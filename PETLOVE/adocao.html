@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Life | Portal de Adoção Responsável</title>
+    <style>
+        :root {
+            --primary: #1b7a43;
+            --primary-hover: #145d32;
+            --primary-light: #e8f5ee;
+            --secondary: #123524;
+            --bg-white: #ffffff;
+            --bg-soft: #f6fbf8;
+            --border-color: #d4e6dc;
+            --text-dark: #18261e;
+            --text-muted: #52695b;
+            --card-shadow: 0 4px 16px rgba(18, 53, 36, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-soft);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-white);
+            padding: 1rem 5%;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(18, 53, 36, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .logo span { color: var(--secondary); }
+
+        /* Hero / Filtros */
+        .hero {
+            background: linear-gradient(135deg, #123524 0%, #1b7a43 100%);
+            color: var(--bg-white);
+            padding: 3rem 5%;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .hero p { color: #e2f1e8; margin-bottom: 2rem; }
+
+        .filter-bar {
+            background: var(--bg-white);
+            padding: 1rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background: var(--bg-white);
+        }
+
+        .filter-bar select:focus, .filter-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Grid de Animais */
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 5%;
+        }
+
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .pet-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pet-card:hover { transform: translateY(-5px); }
+
+        .pet-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .pet-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .pet-name { font-size: 1.3rem; font-weight: 700; color: var(--secondary); }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .pet-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            background: var(--bg-soft);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            color: var(--secondary);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: var(--bg-white);
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 53, 36, 0.55);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem; right: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+        }
+
+        .close-modal:hover { color: var(--secondary); }
+
+        .modal-pet-summary {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-pet-summary img {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--radius);
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Formulário */
+        .form-section-title {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin: 1.5rem 0 0.8rem;
+            border-left: 4px solid var(--primary);
+            padding-left: 0.6rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--secondary);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: var(--bg-white);
+            color: var(--text-dark);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .checkbox-group input {
+            margin-top: 0.25rem;
+            accent-color: var(--primary);
+        }
+
+        footer {
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 1.5rem 5%;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .modal-pet-summary { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo">🐾 Pet <span>Life</span></a>
+        <nav>
+            <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="alert('Aqui abriria a página de cadastro de animais da Pet Life!')">Divulgar um Pet</button>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Pet Life — Adoção Responsável</h1>
+        <p>Conectando animais castrados e vacinados a lares cheios de amor e cuidado.</p>
+        
+        <div class="filter-bar">
+            <select id="filterEspecie" onchange="filtrarPets()">
+                <option value="todos">Todas as Espécies</option>
+                <option value="Cachorro">Cachorros</option>
+                <option value="Gato">Gatos</option>
+            </select>
+            <select id="filterPorte" onchange="filtrarPets()">
+                <option value="todos">Todos os Portes</option>
+                <option value="Pequeno">Porte Pequeno</option>
+                <option value="Médio">Porte Médio</option>
+                <option value="Grande">Porte Grande</option>
+            </select>
+            <input type="text" id="filterCidade" placeholder="Buscar por cidade..." onkeyup="filtrarPets()">
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="pets-grid" id="petsGrid">
+            <!-- Os cards serão gerados via JavaScript -->
+        </div>
+    </main>
+
+    <footer>
+        <strong>Pet Life</strong> — Portal de Adoção Responsável
+    </footer>
+
+    <!-- Modal de Detalhes e Formulário -->
+    <div class="modal-overlay" id="adoptionModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="fecharModal()">&times;</button>
+            
+            <div class="modal-pet-summary" id="modalPetInfo">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <form id="adoptionForm" onsubmit="enviarFormulario(event)">
+                <h3 class="form-section-title">1. Seus Dados</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" required placeholder="Ex: Maria Silva">
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp / Telefone *</label>
+                        <input type="tel" required placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail *</label>
+                        <input type="email" required placeholder="maria@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade e Bairro *</label>
+                        <input type="text" required placeholder="Ex: São Paulo - Pinheiros">
+                    </div>
+                </div>
+
+                <h3 class="form-section-title">2. Sobre a Moradia</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Residência *</label>
+                        <select required>
+                            <option value="">Selecione...</option>
+                            <option value="casa">Casa</option>
+                            <option value="apartamento">Apartamento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Imóvel Próprio ou Alugado? *</label>
+                        <select required>
+                            <option value="">Selecione...</option>
+                            <option value="proprio">Próprio</option>
+                            <option value="alugado_sim">Alugado (Proprietário permite pets)</option>
+                            <option value="alugado_nao">Alugado (Não tenho certeza)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full" id="campoSeguranca">
+                        <!-- Dinâmico: muda se for gato ou cachorro -->
+                    </div>
+                </div>
+
+                <h3 class="form-section-title">3. Rotina e Experiência</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Já possui outros animais em casa? *</label>
+                        <select required>
+                            <option value="nao">Não, será o primeiro</option>
+                            <option value="sim_caes">Sim, cachorro(s)</option>
+                            <option value="sim_gatos">Sim, gato(s)</option>
+                            <option value="sim_ambos">Sim, cães e gatos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quanto tempo o pet ficará sozinho/dia? *</label>
+                        <select required>
+                            <option value="menos_4h">Menos de 4 horas</option>
+                            <option value="4_a_8h">De 4 a 8 horas</option>
+                            <option value="mais_8h">Mais de 8 horas</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Conte brevemente por que quer adotar este pet:</label>
+                        <textarea rows="3" placeholder="Fale um pouco sobre sua família e rotina..."></textarea>
+                    </div>
+                </div>
+
+                <h3 class="form-section-title">4. Compromisso</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="termo1" required>
+                    <label for="termo1">Todos os moradores da casa estão de acordo com a adoção.</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="termo2" required>
+                    <label for="termo2">Estou ciente dos custos com alimentação, vacinas e veterinário.</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="termo3" required>
+                    <label for="termo3">Concordo em enviar fotos/vídeos periódicos para acompanhamento da equipe Pet Life.</label>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 1rem; font-size: 1.05rem;">Enviar Pedido de Adoção</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados simulado
+        const pets = [
+            {
+                id: 1,
+                nome: "Paçoca",
+                especie: "Cachorro",
+                sexo: "Macho",
+                idade: "2 anos",
+                porte: "Médio",
+                cidade: "São Paulo, SP",
+                castrado: true,
+                vacinado: true,
+                tags: ["Dócil", "Brincalhão", "Sociável com cães"],
+                historia: "Resgatado das ruas ainda filhote, o Paçoca adora passear e receber carinho na barriga.",
+                foto: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 2,
+                nome: "Luna",
+                especie: "Gato",
+                sexo: "Fêmea",
+                idade: "8 meses",
+                porte: "Pequeno",
+                cidade: "Curitiba, PR",
+                castrado: true,
+                vacinado: true,
+                tags: ["Calma", "Carinhosa", "FIV/FeLV Negativo"],
+                historia: "Luna é uma gatinha muito tranquila que ama dormir no sofá e ronronar perto de pessoas.",
+                foto: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 3,
+                nome: "Thor",
+                especie: "Cachorro",
+                sexo: "Macho",
+                idade: "4 anos",
+                porte: "Grande",
+                cidade: "Belo Horizonte, MG",
+                castrado: true,
+                vacinado: true,
+                tags: ["Protetor", "Companheiro", "Ama crianças"],
+                historia: "Apesar do tamanho, Thor é um gigante gentil que só quer ficar perto da família.",
+                foto: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 4,
+                nome: "Mingau",
+                especie: "Gato",
+                sexo: "Macho",
+                idade: "1 ano",
+                porte: "Pequeno",
+                cidade: "São Paulo, SP",
+                castrado: true,
+                vacinado: true,
+                tags: ["Curioso", "Ativo", "Sociável com gatos"],
+                historia: "Mingau adora brincar com bolinhas de papel e se dá super bem com outros gatos.",
+                foto: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=600&q=80"
+            }
+        ];
+
+        function renderizarPets(lista) {
+            const grid = document.getElementById('petsGrid');
+            grid.innerHTML = '';
+
+            if (lista.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #52695b;">Nenhum pet encontrado com esses filtros.</p>';
+                return;
+            }
+
+            lista.forEach(pet => {
+                const card = document.createElement('div');
+                card.className = 'pet-card';
+                card.innerHTML = `
+                    <img src="${pet.foto}" alt="${pet.nome}" class="pet-img">
+                    <div class="pet-info">
+                        <div class="pet-header">
+                            <span class="pet-name">${pet.nome}</span>
+                            <span class="badge">${pet.especie} • ${pet.sexo}</span>
+                        </div>
+                        <div class="pet-meta">
+                            📍 ${pet.cidade} | Porte ${pet.porte} | ${pet.idade}
+                        </div>
+                        <div class="tags">
+                            ${pet.castrado ? '<span class="tag">✅ Castrado</span>' : ''}
+                            ${pet.vacinado ? '<span class="tag">💉 Vacinado</span>' : ''}
+                            ${pet.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                        <button class="btn" onclick="abrirModal(${pet.id})">Conhecer e Adotar</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filtrarPets() {
+            const especie = document.getElementById('filterEspecie').value;
+            const porte = document.getElementById('filterPorte').value;
+            const cidade = document.getElementById('filterCidade').value.toLowerCase();
+
+            const filtrados = pets.filter(pet => {
+                const matchEspecie = especie === 'todos' || pet.especie === especie;
+                const matchPorte = porte === 'todos' || pet.porte === porte;
+                const matchCidade = pet.cidade.toLowerCase().includes(cidade);
+                return matchEspecie && matchPorte && matchCidade;
+            });
+
+            renderizarPets(filtrados);
+        }
+
+        function abrirModal(id) {
+            const pet = pets.find(p => p.id === id);
+            if (!pet) return;
+
+            document.getElementById('modalPetInfo').innerHTML = `
+                <img src="${pet.foto}" alt="${pet.nome}">
+                <div>
+                    <h2 style="color: var(--secondary);">${pet.nome} <span class="badge">${pet.especie}</span></h2>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0.3rem 0;">
+                        📍 ${pet.cidade} • ${pet.idade} • Porte ${pet.porte}
+                    </p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">${pet.historia}</p>
+                </div>
+            `;
+
+            const campoSeguranca = document.getElementById('campoSeguranca');
+            if (pet.especie === 'Gato') {
+                campoSeguranca.innerHTML = `
+                    <label>Segurança para Gatos: O imóvel possui telas de proteção nas janelas/sacadas? *</label>
+                    <select required>
+                        <option value="">Selecione...</option>
+                        <option value="sim">Sim, todas as janelas/sacadas são teladas</option>
+                        <option value="vou_telar">Ainda não, mas vou telar antes da adoção</option>
+                        <option value="nao">Não possui telas</option>
+                    </select>
+                `;
+            } else {
+                campoSeguranca.innerHTML = `
+                    <label>Segurança para Cães: O quintal/espaço é totalmente murado e sem rotas de fuga? *</label>
+                    <select required>
+                        <option value="">Selecione...</option>
+                        <option value="sim_dentro">Sim, e o cão terá acesso ao interior da casa</option>
+                        <option value="sim_fora">Sim, mas ficará apenas no quintal</option>
+                        <option value="apartamento">Moro em apartamento (passeios na guia)</option>
+                    </select>
+                `;
+            }
+
+            document.getElementById('adoptionModal').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('adoptionModal').style.display = 'none';
+        }
+
+        function enviarFormulario(e) {
+            e.preventDefault();
+            alert('🎉 Interesse enviado com sucesso para a Pet Life! Entraremos em contato pelo WhatsApp em breve.');
+            fecharModal();
+            document.getElementById('adoptionForm').reset();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('adoptionModal');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+
+        renderizarPets(pets);
+    </script>
+</body>
+</html>
